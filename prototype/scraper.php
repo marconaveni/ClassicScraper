@@ -1,23 +1,22 @@
-<?php 
+<?php
 /**
  * Summary of Scraper
  */
 class Scraper
 {
-    
     private DOMXPath $finder;
-    
-    public function loadHTML(string $link) :void
+
+    public function loadHTML(string $link): void
     {
         libxml_use_internal_errors(true);
         $html = file_get_contents($link);
         $DOM = new DOMDocument();
-        $DOM->loadHTML($html);     
+        $DOM->loadHTML($html);
         $this->finder = new DomXPath($DOM);
-    } 
+    }
 
 
-    public function query(string $query) 
+    public function query(string $query)
     {
         $nodes = $this->finder->query($query); //example //a[@class='fancybox-thumb']/@href
         $array = [];
@@ -26,10 +25,11 @@ class Scraper
         }
         return $array;
     }
-    
-	public function getDOM() {       
-		return $this->finder;
-	}
+
+    public function getDOM()
+    {
+        return $this->finder;
+    }
 }
 
 ?>
