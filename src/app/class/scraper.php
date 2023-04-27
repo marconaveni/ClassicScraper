@@ -1,18 +1,18 @@
 <?php
-/**
- * Summary of Scraper
- */
+
+namespace classic\app\class;
+
 class Scraper
 {
-    private DOMXPath $finder;
+    private \DOMXPath $finder;
 
     public function loadHTML(string $link): void
     {
         libxml_use_internal_errors(true);
         $html = file_get_contents($link);
-        $DOM = new DOMDocument();
+        $DOM = new \DOMDocument();
         $DOM->loadHTML($html);
-        $this->finder = new DomXPath($DOM);
+        $this->finder = new \DomXPath($DOM);
     }
 
 

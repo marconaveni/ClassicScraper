@@ -1,8 +1,8 @@
 <?php
 
+namespace classic\app\class;
 
-
-class Developer
+class Publisher
 {
     public int $id;
     public string $name;

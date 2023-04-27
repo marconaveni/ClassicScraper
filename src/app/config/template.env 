@@ -1,0 +1,6 @@
+
+PRIVATE_APIKEY = {private api the game db}
+PUBLIC_APIKEY = {public api the game db}
+servername = "localhost";
+username = "root";
+password = "";

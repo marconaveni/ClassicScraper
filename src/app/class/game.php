@@ -1,7 +1,10 @@
 <?php
 
-require_once "publisher.php";
-require_once "developer.php";
+namespace classic\app\class;
+
+// require_once "publisher.php";
+// require_once "developer.php";
+// require_once "genres.php";
 
 class Game
 {
@@ -12,7 +15,7 @@ class Game
     public Publisher $publisher;
     public string $releaseDate;
     public string $players;
-    public string $genre;
+    public Genres $genres;
     public string $cover;
     public string $screenshot;
     public string $video;
@@ -93,14 +96,14 @@ class Game
         $this->players = $value;
     }
 
-    public function getGenre(): string
+    public function getGenres(): Genres
     {
-        return $this->genre;
+        return $this->genres;
     }
 
-    public function setGenre(string $value)
+    public function setGenres(Genres $value)
     {
-        $this->genre = $value;
+        $this->genres = $value;
     }
 
     public function getCover(): string

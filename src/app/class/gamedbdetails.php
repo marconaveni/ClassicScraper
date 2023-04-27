@@ -1,8 +1,9 @@
 <?php
 
+namespace classic\app\class;
 
-require_once "scraper.php";
-require_once 'game.php';
+// require_once "scraper.php";
+// require_once 'game.php';
 
 class GameDBDetails
 {
@@ -54,7 +55,9 @@ class GameDBDetails
                 continue;
             }
             if (str_contains($description, 'Genre(s):')) {
-                $game->genre = $this->formatDescription($description);
+                $genre = new Genres();
+                $genre->name = $this->formatDescription($description);
+                $game->genres = $genre;
                 break;
             }
 
