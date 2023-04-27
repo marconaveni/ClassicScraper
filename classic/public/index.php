@@ -1,23 +1,26 @@
 <?php
 
 
-use classic\app\class\GameDBSearch;
+use classic\app\src\GameDBSearch;
 use classic\app\databases\DB;
-use classic\app\class\Game;
-use classic\app\class\Publisher;
-use classic\app\class\Developer;
-use classic\app\class\Genres;
+use classic\app\src\Game;
+use classic\app\src\Publisher;
+use classic\app\src\Developer;
+use classic\app\src\Genres;
 
 spl_autoload_register(function ($classNome) {
 
     $classNome = strtolower($classNome);
-    $classNome = str_replace('classic\\app\\', '/', $classNome);
-    $classNome = str_replace('\\', '/', $classNome . ".php");
-    $dirPath = str_replace('/public', '/app', __DIR__);
-    //var_dump($classNome);
-    //var_dump($dirPath);
-    //var_dump($dirPath . $classNome);
+    $classNome = str_replace('classic', '', $classNome);
+    $classNome = str_replace('\\', DIRECTORY_SEPARATOR , $classNome . ".php");
+    $dirPath = str_replace('public' , '', __DIR__);
+    $classNome = implode('', explode(DIRECTORY_SEPARATOR, $classNome, 2));
+  //  var_dump($classNome);
+  //  var_dump($dirPath);
 
+   // var_dump($dirPath . $classNome);
+
+    
     if(!file_exists($dirPath . $classNome)) {
         echo "Arquivo \"" . $dirPath . $classNome ."\" não existe!";
         exit;
@@ -27,13 +30,15 @@ spl_autoload_register(function ($classNome) {
 });
 
 
+//echo $_SERVER['REQUEST_URI'];
 
+$gdbs = new GameDBSearch();
+$ids = $gdbs->scrapByGameName("Super Mario World", 6);
+//$games[] = $gdbs->apiByGameID($ids[0]);
+$games[] = $gdbs->scrapByGameID($ids[0]);
+echo json_encode($games);
 
-// $gdbs = new GameDBSearch();
-// $ids = $gdbs->scrapByGameName("Super Mario World", 6);
-// $games[] = $gdbs->apiByGameID($ids[0]);
-//$games[] = $gdbs->scrapByGameID($ids[0]);
-//echo json_encode($games);
+exit;
 
 $conn = DB::dbConnection();
 $result = DB::getGameById($conn, 136);
@@ -60,7 +65,7 @@ foreach ($result as $key) {
     $game->screenshot = $key['screenshot'];   
 
 
-    echo json_encode($game);
+    //echo json_encode($game);
     //var_dump($game);
 }
 

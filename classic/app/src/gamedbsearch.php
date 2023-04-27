@@ -1,11 +1,11 @@
 <?php
 
-namespace classic\app\class;
+namespace classic\app\src;
 
- //require_once "gamedbdetails.php";
- //require_once "../config/config.php";
+//require_once "gamedbdetails.php";
+//require_once "../config/config.php";
 
- use classic\app\config\config;
+use classic\app\config\config;
 
 class GameDBSearch
 {
@@ -25,14 +25,16 @@ class GameDBSearch
 
         foreach ($links as $id) {
             $value = explode("id=", $id);
-            $ids[] = (int)$value[1] ?? 0;
+            if (isset($value[1]) != null) {
+                $ids[] = (int)$value[1] ?? 0;
+            }
         }
 
         sort($ids);
         return $ids;
     }
 
-    public function scrapByGameID(int $id) : Game
+    public function scrapByGameID(int $id): Game
     {
         $gdb = new GameDBDetails();
         return  $gdb->loadGameDetails($id);
@@ -50,7 +52,7 @@ class GameDBSearch
     }
 
 
-    public function apiByPlatformID(int $plataformId,int $page = 1 ): array
+    public function apiByPlatformID(int $plataformId, int $page = 1): array
     {
         $apiPrivate = $this->apiPrivate;
         $url = "https://api.thegamesdb.net/v1/Games/ByPlatformID?apikey=$apiPrivate&id=$plataformId&fields=overview%2Cpublishers%2Cdevelopers%2Cgenres%2Cplayers&page=$page";
@@ -60,12 +62,12 @@ class GameDBSearch
         return $this->setGame($json);
     }
 
-    private function setGame($json) : array
+    private function setGame($json): array
     {
         foreach ($json->data->games as $jgame) {
             $game = new Game();
             $publisher = new Publisher();
-            $publisher->id = $jgame->publishers[0];          
+            $publisher->id = $jgame->publishers[0];
             $developer = new Developer();
             $developer->id = $jgame->developers[0];
             $genres = new Genres();
@@ -73,8 +75,8 @@ class GameDBSearch
 
             $game->id = $jgame->id;
             $game->title = $jgame->game_title;
-            $game->releaseDate = $jgame->release_date;  
-            $game->description = $jgame->overview;       
+            $game->releaseDate = $jgame->release_date;
+            $game->description = $jgame->overview;
             $game->publisher = $publisher;
             $game->developer = $developer;
             $game->genres = $genres;

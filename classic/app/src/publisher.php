@@ -1,6 +1,6 @@
 <?php
 
-namespace classic\app\class;
+namespace classic\app\src;
 
 class Publisher
 {

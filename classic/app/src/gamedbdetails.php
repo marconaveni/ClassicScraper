@@ -1,6 +1,6 @@
 <?php
 
-namespace classic\app\class;
+namespace classic\app\src;
 
 // require_once "scraper.php";
 // require_once 'game.php';
@@ -17,11 +17,11 @@ class GameDBDetails
     private function setImages(Game $game, array $images): Game
     {
         foreach ($images as $img) {
-            if (str_contains($img, 'front')) {
+            if (strpos($img, 'front') !== false) {
                 $game->cover = str_replace("original", "thumb", $img);
                 continue;
             }
-            if (str_contains($img, 'screenshots')) {
+            if (strpos($img, 'screenshots') !== false) {
                 $game->screenshot = str_replace("original", "large", $img);
                 break;
             }
@@ -32,29 +32,29 @@ class GameDBDetails
     private function getInfos(Game $game, array $descriptions, array $ids): Game
     {
         foreach ($descriptions as $description) {
-            if (str_contains($description, 'Developer(s):')) {
+            if (strpos($description, 'Developer(s):') !== false) {
                 $developer = new Developer();
                 $developer->id = $ids[1] ?? 0;
                 $developer->name = $this->formatDescription($description);
                 $game->developer = $developer;
                 continue;
             }
-            if (str_contains($description, 'Publishers(s):')) {
+            if (strpos($description, 'Publishers(s):') !== false) {
                 $publisher = new Publisher();
                 $publisher->id = $ids[2] ?? 0;
                 $publisher->name = $this->formatDescription($description);
                 $game->publisher = $publisher;
                 continue;
             }
-            if (str_contains($description, 'ReleaseDate:')) {
+            if (strpos($description, 'ReleaseDate:') !== false) {
                 $game->releaseDate = $this->formatDescription($description);
                 continue;
             }
-            if (str_contains($description, 'Players:')) {
+            if (strpos($description, 'Players:') !== false) {
                 $game->players = $this->formatDescription($description);
                 continue;
             }
-            if (str_contains($description, 'Genre(s):')) {
+            if (strpos($description, 'Genre(s):') !== false) {
                 $genre = new Genres();
                 $genre->name = $this->formatDescription($description);
                 $game->genres = $genre;
@@ -93,7 +93,8 @@ class GameDBDetails
 
         foreach ($links as $i) {
             $value = explode("id=", $i);
-            $ids[] = (int)$value[1] ?? 0;
+            if (isset($value[1]) != null)
+                $ids[] = (int)$value[1] ?? 0;
         }
 
         $game->id = $id;
