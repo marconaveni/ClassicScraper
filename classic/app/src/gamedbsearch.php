@@ -13,13 +13,13 @@ class GameDBSearch
 
     public function __construct()
     {
-        $this->apiPrivate = config::getDotEnv("PUBLIC_APIKEY");
+        $this->apiPrivate = "";//config::getDotEnv("PUBLIC_APIKEY");
     }
 
     public function scrapByGameName(string $name, int $platformId): array
     {
+        $name = urlencode($name);
         $scraper = new Scraper();
-
         $scraper->loadHTML("https://thegamesdb.net/search.php?name=$name&platform_id[]=$platformId");
         $links = $scraper->query("//div[@class='col-6 col-md-2']/div/a/@href");
 

@@ -29,7 +29,8 @@ spl_autoload_register(function ($classNome) {
 
 });
 
-
+//phpinfo();
+//exit;
 //echo $_SERVER['REQUEST_URI'];
 
 $gdbs = new GameDBSearch();
