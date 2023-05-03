@@ -19,6 +19,7 @@ class Game
     public string $cover;
     public string $screenshot;
     public string $video;
+    public Plataform $platform;
 
     /* This is the static comparing function: */
     public static function compareId($a, $b)
@@ -134,5 +135,15 @@ class Game
     public function setVideo(string $value)
     {
         $this->video = $value;
+    }
+
+    public function getPlatform(): Plataform
+    {
+        return $this->platform;
+    }
+
+    public function setPlatform(Plataform $value)
+    {
+        $this->platform = $value;
     }
 }

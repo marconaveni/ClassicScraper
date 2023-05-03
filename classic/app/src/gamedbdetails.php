@@ -22,7 +22,7 @@ class GameDBDetails
                 continue;
             }
             if (strpos($img, 'screenshots') !== false) {
-                $game->screenshot = str_replace("original", "large", $img);
+                $game->screenshot = str_replace("original", "thumb", $img);
                 break;
             }
         }
