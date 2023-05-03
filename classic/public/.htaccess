@@ -1,9 +1,9 @@
 RewriteEngine on
 #Options -Indexes
 
-RewriteRule ^gamebyid/$ ./index.php [NC,QSA]
-RewriteRule ^plataforms/$ ./index.php [NC,QSA]
-RewriteRule ^gamebyname/$ ./index.php [NC,QSA]
+#RewriteRule ^gamebyid$ ./index.php [NC,QSA]
+#RewriteRule ^plataforms$ ./index.php [NC,QSA]
+RewriteRule ^([a-z]+)$ ./index.php [NC,QSA]
 
 
 RewriteCond %{SCRIPT_FILENAME} !-f 

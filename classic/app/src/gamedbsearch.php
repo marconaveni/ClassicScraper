@@ -50,7 +50,7 @@ class GameDBSearch
         $json = file_get_contents($url);
         $json = json_decode($json);
 
-        return $this->setGame($games,$json);
+        return $this->setGame($games, $json);
     }
 
     public function apiGetPlataforms(): array
@@ -105,7 +105,7 @@ class GameDBSearch
 
 
 
-    private function setGame(array &$games,$json): bool
+    private function setGame(array &$games, $json): bool
     {
         // var_dump($json->include->boxart->data->{292}[0]->filename);
         // exit;
@@ -134,7 +134,9 @@ class GameDBSearch
             $game->releaseDate = $jgame->release_date ?? "";
             $game->description = $jgame->overview ?? "";
             $game->players = $jgame->players ?? 1;
-            $game->cover = "https://cdn.thegamesdb.net/images/thumb/" . $json->include->boxart->data->{$jgame->id}[0]->filename;
+            if(isset($json->include->boxart->data->{$jgame->id}[0]->filename)) {
+                $game->cover = "https://cdn.thegamesdb.net/images/thumb/" . $json->include->boxart->data->{$jgame->id}[0]->filename;
+            }
             if(Helpers::getHttpStatusOk("https://cdn.thegamesdb.net/images/thumb/screenshots/$jgame->id-1.jpg")) {
                 $game->screenshot = "https://cdn.thegamesdb.net/images/thumb/screenshots/$jgame->id-1.jpg";
             }
