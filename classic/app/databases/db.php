@@ -112,12 +112,12 @@ class DB
         $stmt = $conn->prepare('SELECT  `id`,`game_title`,`players`,`release_date`,`overview`,`platform`
                                 FROM `games` 
                                 WHERE ( REPLACE(REPLACE(`game_title` , \':\' , \'\' ) , \'!\', \'\')'. $comparison . ' :title 
-                                OR `id` = (SELECT `games_id` FROM `games_alts` WHERE REPLACE(REPLACE(`name` , \':\' , \'\' ) , \'!\', \'\') LIKE :title LIMIT 1)  
+                                OR `id` = (SELECT `games_id` FROM `games_alts` WHERE REPLACE(REPLACE(`name` , \':\' , \'\' ) , \'!\', \'\') LIKE :titlealt LIMIT 1)  
                                 ) AND `platform` = :platform LIMIT 20;         
                                 ');
 
 
-        $stmt->execute(array('title' => $searchTitle ,'platform' => $platform));
+        $stmt->execute(array('title' => $searchTitle ,'platform' => $platform , 'titlealt' => "%$searchTitle%"));
         $result = $stmt->fetchAll();
 
         $games = array();

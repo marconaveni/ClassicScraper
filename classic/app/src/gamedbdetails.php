@@ -34,14 +34,14 @@ class GameDBDetails
         foreach ($descriptions as $description) {
             if (strpos($description, 'Developer(s):') !== false) {
                 $developer = new Developer();
-                $developer->id = $ids[1] ?? 0;
+                //$developer->id = $ids[1] ?? 0;
                 $developer->name = $this->formatDescription($description);
                 $game->developer = $developer;
                 continue;
             }
             if (strpos($description, 'Publishers(s):') !== false) {
                 $publisher = new Publisher();
-                $publisher->id = $ids[2] ?? 0;
+                //$publisher->id = $ids[2] ?? 0;
                 $publisher->name = $this->formatDescription($description);
                 $game->publisher = $publisher;
                 continue;

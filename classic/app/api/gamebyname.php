@@ -4,12 +4,14 @@ use classic\app\config\config;
 use classic\app\databases\DB;
 use classic\app\src\GameDBDetails;
 use classic\app\src\GameDBSearch;
+use classic\app\src\Helpers;
 
 function getDBPlatforms()
 {
     $conn = DB::dbConnection(config::getDotEnv("database"));
 
     $resultsgames = DB::getGame($conn, $_GET['title'], $_GET['plataformid']);
+    $type = "Database";
 
     if(sizeof($resultsgames) == 0) {
         $gdbs = new GameDBSearch();
@@ -18,29 +20,28 @@ function getDBPlatforms()
         foreach ($ids as $id) {
             $resultsgames[] = $details->loadGameDetails($id);
         }
+        $type = "Site";
     }
 
-    echo "{ \"code\":200 , \"status\":\"Success\" , \"games\":" . json_encode($resultsgames) . "}";
+    echo "{\"code\":" . http_response_code() .",\"status\":\"Success\",\"type\":\"" . $type . "\",\"search\":\"" . $_GET['title'] .  "\",\"games\":" . json_encode($resultsgames) . "}";
     exit;
 
 }
 
-function setTitle()
-{
-    $matches = array();
-    $title = $_GET['title'];
-    $title = str_replace(" - ", " ", $title);
-    $title = str_replace(":", "", $title);
-    $title = str_replace("!", "", $title);
-    $title = preg_replace('/(\s\()([0-9a-zA-Z\,\s)(.]+)/', "", $title);
-    preg_match('/, ([0-9a-zA-Z]{1,3})/', $title, $matches);
-    $title = preg_replace('/, ([A-Za-z])([A-Za-z])([A-Za-z])?/', "", $title);
-    if(isset($matches[1])) {
-        $title = $matches[1] . " " . $title;
-    }
-    $_GET['title'] = trim($title);
+
+if(!isset($_GET['title']) || !isset($_GET['plataformid'])) {
+    http_response_code(400);
+    echo "{\"code\":" . http_response_code() .",\"status\":\"Parameters not found\"}";
+    exit;
+}
+
+$platformId = (int)$_GET['plataformid'] ;
+if($platformId == 0) {
+    http_response_code(400);
+    echo "{\"code\":" . http_response_code() .",\"status\":\"platformid invalid\"}";
+    exit;
 }
 
 
-setTitle();
+$_GET['title'] = Helpers::setTitle($_GET['title']);
 getDBPlatforms();

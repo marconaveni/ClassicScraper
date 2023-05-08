@@ -1,16 +1,7 @@
 RewriteEngine on
 #Options -Indexes
 
-#RewriteRule ^gamebyid$ ./index.php [NC,QSA]
-#RewriteRule ^plataforms$ ./index.php [NC,QSA]
-RewriteRule ^([a-z]+)$ ./index.php [NC,QSA]
+RewriteRule ^api/([a-z]+)$ ./index.php [NC,QSA]
 
 
-RewriteCond %{SCRIPT_FILENAME} !-f 
-RewriteCond %{SCRIPT_FILENAME} !-d
-RewriteRule ^([a-zA-Z0-9_-]+)/$ ./index.php
-
-
-
-
-#RewriteRule ^gamebyname/([0-9]+)/([a-z0-9][&+-_*-+.]+)/?$ ./index.php?id=$1&title=$2 [NC,QSA]
+RewriteRule ^([a-z0-9/]+)$ ./index.php [NC]
