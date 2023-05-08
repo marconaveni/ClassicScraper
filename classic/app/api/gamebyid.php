@@ -1,15 +1,27 @@
 <?php
 
+use classic\app\config\config;
 use classic\app\databases\DB;
+use classic\app\src\GameDBDetails;
 use classic\app\src\GameDBSearch;
 
-$conn = DB::dbConnection();
-$game = DB::getGameById($conn, $_GET['id']);
+function getDBPlatforms()
+{
+    $conn = DB::dbConnection(config::getDotEnv("database"));
 
-if(!isset($game->id)) {
-    $gdbs = new GameDBSearch();
-    $games[] = $gdbs->apiGetByGameID($_GET['id']);
+    $resultsgames = array();
+    $resultsgames[] = DB::getGameID($conn, $_GET['id']);
 
-    $game = DB::insertGame($conn, array_shift($games[0]));
+    if(!isset($resultsgames[0]->id)) {
+        $resultsgames = array();
+        $gdbs = new GameDBSearch();
+        $details = new GameDBDetails();
+        $resultsgames[] = $gdbs->scrapByGameID($_GET['id']);
+    }
+
+    echo "{ \"code\":200 , \"status\":\"Success\" , \"games\":" . json_encode($resultsgames) . "}";
+    exit;
+
 }
-echo json_encode($game);
+
+getDBPlatforms();

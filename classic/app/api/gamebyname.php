@@ -1,39 +1,46 @@
 <?php
 
+use classic\app\config\config;
 use classic\app\databases\DB;
+use classic\app\src\GameDBDetails;
 use classic\app\src\GameDBSearch;
 
-$conn = DB::dbConnection();
-$count = 0;
-$resultsgames = DB::getGameByName($conn, $_GET['title'], $_GET['plataformid'], $count);
+function getDBPlatforms()
+{
+    $conn = DB::dbConnection(config::getDotEnv("database"));
 
-if($count > 0) {
-    echo json_encode($resultsgames);
-    exit;
-}
+    $resultsgames = DB::getGame($conn, $_GET['title'], $_GET['plataformid']);
 
-$gdbs = new GameDBSearch();
-$ids = $gdbs->scrapByGameName($_GET['title'], $_GET['plataformid']);
-
-if(sizeof($ids) == 0){
-    echo "not found";
-}
-
-$games = array();
-
-foreach ($ids as $id) {
-    //$games[] = $gdbs->scrapByGameID($id);
-    $conn = DB::dbConnection();
-    $game = DB::getGameById($conn, $id);
-    if(!isset($game->id)) {
+    if(sizeof($resultsgames) == 0) {
         $gdbs = new GameDBSearch();
-        $gamesDB = array();
-        if(!$gdbs->apiGetByGameID($gamesDB, $id)) {
-            continue;
+        $details = new GameDBDetails();
+        $ids = $gdbs->scrapByGameName($_GET['title'], $_GET['plataformid']);
+        foreach ($ids as $id) {
+            $resultsgames[] = $details->loadGameDetails($id);
         }
-        $game = array_shift($gamesDB);
-        DB::insertGame($conn, $game);
     }
-    $games[] = $game;
+
+    echo "{ \"code\":200 , \"status\":\"Success\" , \"games\":" . json_encode($resultsgames) . "}";
+    exit;
+
 }
-echo json_encode($games);
+
+function setTitle()
+{
+    $matches = array();
+    $title = $_GET['title'];
+    $title = str_replace(" - ", " ", $title);
+    $title = str_replace(":", "", $title);
+    $title = str_replace("!", "", $title);
+    $title = preg_replace('/(\s\()([0-9a-zA-Z\,\s)(.]+)/', "", $title);
+    preg_match('/, ([0-9a-zA-Z]{1,3})/', $title, $matches);
+    $title = preg_replace('/, ([A-Za-z])([A-Za-z])([A-Za-z])?/', "", $title);
+    if(isset($matches[1])) {
+        $title = $matches[1] . " " . $title;
+    }
+    $_GET['title'] = trim($title);
+}
+
+
+setTitle();
+getDBPlatforms();

@@ -11,12 +11,16 @@ use classic\app\src\Publisher;
 
 class DB
 {
-    public static function dbConnection()
+    public static function dbConnection(string $database = "")
     {
         $servername = config::getDotEnv("servername");
         $username = config::getDotEnv("username");
         $password = config::getDotEnv("password");
-        $database = config::getDotEnv("database");
+        if($database == "") {
+            $database = config::getDotEnv("databaseGameDB");
+        }
+        $tgdb = config::getDotEnv("databasetgdb");
+
 
         try {
 
@@ -29,12 +33,299 @@ class DB
         }
     }
 
+    public static function getGameID(\PDO $conn, string $id)
+    {
+        $stmt = $conn->prepare('SELECT  `id`,`game_title`,`players`,`release_date`,`overview`,`platform`
+                                FROM `games` 
+                                WHERE `id` = :id_game       
+                                ');
 
+        $stmt->execute(array('id_game' => $id ));
+        $result = $stmt->fetchAll();
+
+        foreach ($result as $key) {
+            $game = new Game();
+            $cover = "";
+            $screenshot = "";
+
+            if(isset($key['id'])) {
+                $game->genres = DB::getGenre($conn, $key['id']);
+                $game->publisher = DB::getPublisher($conn, $key['id']);
+                $game->developer = DB::getDeveloper($conn, $key['id']);
+                $cover = DB::getCover($conn, $key['id']);
+                $screenshot = DB::getScreenshot($conn, $key['id']);
+                $game->id = $key['id'];
+            }
+            if(isset($key['game_title'])) {
+                $game->title = $key['game_title'];
+            }
+            if(isset($key['players'])) {
+                $game->players = $key['players'];
+            }
+            if(isset($key['release_date'])) {
+                $game->releaseDate = $key['release_date'];
+            }
+            if(isset($key['overview'])) {
+                $game->description = str_replace("&quot;", "", $key['overview']);
+            }
+            if($cover != "") {
+                $game->cover = $cover;
+            }
+            if($screenshot != "") {
+                $game->screenshot = $screenshot;
+            }
+            return $game;
+        }
+        
+    }
+
+    public static function getGame(\PDO $conn, string $title, string $platform, int $try = 1)
+    {
+
+        switch ($try) {
+            case 1:
+                $comparison = "=";
+                $queryLeft = "";
+                $queryRight = "";
+                $searchTitle = $queryLeft . $title .$queryRight;
+                break;
+            case 2:
+                $comparison = "LIKE";
+                $queryLeft = "%";
+                $queryRight = "";
+                $searchTitle = $queryLeft . $title .$queryRight;
+                break;
+            case 3:
+                $comparison = "LIKE";
+                $queryLeft = "%";
+                $queryRight = "%";
+                $searchTitle = $queryLeft . $title .$queryRight;
+                break;
+            default:
+                $comparison = "LIKE";
+                $queryLeft = "%";
+                $queryRight = "%";
+                $searchTitle = $queryLeft . htmlspecialchars($title) .$queryRight;
+                break;
+        }
+
+        $stmt = $conn->prepare('SELECT  `id`,`game_title`,`players`,`release_date`,`overview`,`platform`
+                                FROM `games` 
+                                WHERE ( REPLACE(REPLACE(`game_title` , \':\' , \'\' ) , \'!\', \'\')'. $comparison . ' :title 
+                                OR `id` = (SELECT `games_id` FROM `games_alts` WHERE REPLACE(REPLACE(`name` , \':\' , \'\' ) , \'!\', \'\') LIKE :title LIMIT 1)  
+                                ) AND `platform` = :platform LIMIT 20;         
+                                ');
+
+
+        $stmt->execute(array('title' => $searchTitle ,'platform' => $platform));
+        $result = $stmt->fetchAll();
+
+        $games = array();
+
+        //echo "$try <hr>";
+
+        if(sizeof($result) == 0 && $try < 4) {
+            $games = DB::getGame($conn, $title, $platform, ++$try);
+        }
+
+        foreach ($result as $key) {
+            $game = new Game();
+            $cover = "";
+            $screenshot = "";
+
+            if(isset($key['id'])) {
+                $game->genres = DB::getGenre($conn, $key['id']);
+                $game->publisher = DB::getPublisher($conn, $key['id']);
+                $game->developer = DB::getDeveloper($conn, $key['id']);
+                $cover = DB::getCover($conn, $key['id']);
+                $screenshot = DB::getScreenshot($conn, $key['id']);
+                $game->id = $key['id'];
+            }
+            if(isset($key['game_title'])) {
+                $game->title = $key['game_title'];
+            }
+            if(isset($key['players'])) {
+                $game->players = $key['players'];
+            }
+            if(isset($key['release_date'])) {
+                $game->releaseDate = $key['release_date'];
+            }
+            if(isset($key['overview'])) {
+                $game->description = str_replace("&quot;", "", $key['overview']);
+            }
+            if($cover != "") {
+                $game->cover = $cover;
+            }
+            if($screenshot != "") {
+                $game->screenshot = $screenshot;
+            }
+            $games[] = $game;
+
+        }
+        return $games;
+    }
+
+    public static function getDeveloper(\PDO $conn, int $gameID)
+    {
+        $stmt = $conn->prepare('SELECT `d`.`name`
+                                FROM `games_devs` AS `gd`
+                                INNER JOIN `devs_list` AS `d` ON `gd`.`dev_id` = `d`.`id`
+                                WHERE `gd`.`games_id` = :gameID;      
+                                ');
+
+        $stmt->execute(array('gameID' => $gameID));
+        $result = $stmt->fetchAll();
+
+        $developer = new Developer();
+        $developer->name = "";
+        foreach ($result as $key) {
+            if($developer->name != "") {
+                $developer->name .= "|";
+            }
+            if(isset($key['name'])) {
+                $developer->name .= $key['name'];
+            }
+        }
+        return $developer->name == "" ? new Developer() : $developer;
+    }
+    public static function getPublisher(\PDO $conn, int $gameID)
+    {
+        $stmt = $conn->prepare('SELECT `p`.`name`
+                                FROM `games_pubs` AS `gp`
+                                INNER JOIN `pubs_list` AS `p` ON `gp`.`pub_id` = `p`.`id`
+                                WHERE `gp`.`games_id` = :gameID;       
+        ');
+        $stmt->execute(array('gameID' => $gameID));
+        $result = $stmt->fetchAll();
+
+        $publisher = new Publisher();
+        $publisher->name = "";
+        foreach ($result as $key) {
+            if($publisher->name != "") {
+                $publisher->name .= "|";
+            }
+            if(isset($key['name'])) {
+                $publisher->name .= $key['name'];
+            }
+        }
+        return $publisher->name == "" ? new Publisher() : $publisher;
+    }
+
+
+    public static function getGenre(\PDO $conn, int $gameID)
+    {
+        $stmt = $conn->prepare('SELECT `gr`.`genre`
+                                FROM `games_genre` AS `gg`
+                                INNER JOIN `genres` AS `gr` ON `gr`.`id` = `gg`.`genres_id`
+                                WHERE `gg`.`games_id` = :gameID;        
+                                ');
+
+        $stmt->execute(array('gameID' => $gameID));
+        $result = $stmt->fetchAll();
+
+        $genre = new Genres();
+        $genre->name = "";
+        foreach ($result as $key) {
+            if($genre->name != "") {
+                $genre->name .= "|";
+            }
+            if(isset($key['genre'])) {
+                $genre->name .= $key['genre'];
+            }
+        }
+        return $genre->name == "" ? new Genres() : $genre;
+    }
+
+
+    public static function getGenres(\PDO $conn)
+    {
+        $stmt = $conn->prepare('SELECT `id`, `genre`
+                                FROM `genres`
+                                ORDER BY `genre`;  
+                                ');
+
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+
+        $genres = array();
+        foreach ($result as $key) {
+                $genre = new Genres();
+                $genre->id = $key['id'];
+                $genre->name = $key['genre'];
+                $genres[] = $genre;
+        }
+        return $genres;
+    }
+
+    public static function getCover(\PDO $conn, int $gameID)
+    {
+        $stmt = $conn->prepare('SELECT `filename`
+                                FROM `banners`
+                                WHERE `games_id` = :gameID AND `side` = \'front\';
+                                ');
+
+        $stmt->execute(array('gameID' => $gameID));
+        $result = $stmt->fetchAll();
+
+        foreach ($result as $key) {
+            $cover = "https://cdn.thegamesdb.net/images/thumb/" . $key['filename'];
+            break;
+        }
+        return $cover ?? "";
+
+    }
+
+    public static function getScreenshot(\PDO $conn, int $gameID)
+    {
+        $stmt = $conn->prepare('SELECT `filename`
+        FROM `banners`
+        WHERE `games_id` = :gameID
+        AND (`type` = \'screenshot\' OR `type` = \'fanart\')
+        ORDER BY `type` DESC;     
+        ');
+
+        $stmt->execute(array('gameID' => $gameID));
+        $result = $stmt->fetchAll();
+
+        foreach ($result as $key) {
+            $screenshot = "https://cdn.thegamesdb.net/images/thumb/" . $key['filename'];
+            break;
+        }
+        return $screenshot ?? "";
+    }
+
+
+    public static function getPlatforms(\PDO $conn)
+    {
+        $stmt = $conn->prepare('SELECT `id`, `name`, `alias`
+                                FROM platforms ORDER BY `name`;       
+                                ');
+
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+
+        $platforms = array();
+        foreach ($result as $key) {
+                $platform = new Plataform();
+                $platform->id = $key['id'];
+                $platform->name = $key['name'];
+                $platform->alias = $key['alias'];
+                $platforms[] = $platform;
+        }
+        return $platforms;
+    }
+
+
+
+/*
+
+
+
+    ////////////////////////////////////
     public static function getGameByName(\PDO $conn, string $title, string $plataform, int &$count)
     {
-        $stmt = $conn->prepare('SELECT * FROM game WHERE title like :title AND plataforms = :plataform ORDER BY title,id');
-        $stmt->execute(array('title' => "$title%",'plataform' => $plataform));
-        // $stmt->execute(array('plataform' => $plataform));
+        $stmt = $conn->prepare('SELECT * FROM game WHERE title like :title AND plataforms = :plataform ORDER BY id,title');
+        $stmt->execute(array('title' => "%$title%",'plataform' => $plataform));
         $result = $stmt->fetchAll();
 
         $games = array();
@@ -360,4 +651,7 @@ class DB
             echo 'Error: ' . $e->getMessage();
         }
     }
+
+
+    */
 }

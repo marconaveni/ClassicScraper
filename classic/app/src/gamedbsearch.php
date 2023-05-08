@@ -53,6 +53,17 @@ class GameDBSearch
         return $this->setGame($games, $json);
     }
 
+    public function apiGetByGameName(array &$games, string $title, int $plataformID): bool
+    {
+        $apiPrivate = $this->apiPrivate;
+        $title = urlencode($title);
+        $url = "https://api.thegamesdb.net/v1/Games/ByGameName?apikey=$apiPrivate&name=$title&fields=overview%2Cpublishers%2Cdevelopers%2Cgenres%2Cplayers%2Cplatform&filter%5Bplatform%5D=$plataformID&include=boxart";
+        $json = file_get_contents($url);
+        $json = json_decode($json);
+
+        return $this->setGame($games, $json);
+    }
+
     public function apiGetPlataforms(): array
     {
         $apiPrivate = $this->apiPrivate;
@@ -107,23 +118,22 @@ class GameDBSearch
 
     private function setGame(array &$games, $json): bool
     {
-        // var_dump($json->include->boxart->data->{292}[0]->filename);
-        // exit;
+
         foreach ($json->data->games as $jgame) {
 
             $game = new Game();
 
             if(isset($jgame->publishers[0])) {
                 $conn = DB::dbConnection();
-                $game->publisher = DB::getPublisherById($conn, $jgame->publishers[0]);
+                $game->publisher = DB::getPublisher($conn, $jgame->publishers[0]);
             }
             if(isset($jgame->developers[0])) {
                 $conn = DB::dbConnection();
-                $game->developer = DB::getDevelopersById($conn, $jgame->developers[0]);
+                $game->developer = DB::getDeveloper($conn, $jgame->developers[0]);
             }
             if(isset($jgame->genres[0])) {
                 $conn = DB::dbConnection();
-                $game->genres = DB::getGenresById($conn, $jgame->genres[0]);
+                $game->genres = DB::getGenre($conn, $jgame->genres[0]);
             }
 
             $plataform = new Plataform();
@@ -137,9 +147,7 @@ class GameDBSearch
             if(isset($json->include->boxart->data->{$jgame->id}[0]->filename)) {
                 $game->cover = "https://cdn.thegamesdb.net/images/thumb/" . $json->include->boxart->data->{$jgame->id}[0]->filename;
             }
-            if(Helpers::getHttpStatusOk("https://cdn.thegamesdb.net/images/thumb/screenshots/$jgame->id-1.jpg")) {
-                $game->screenshot = "https://cdn.thegamesdb.net/images/thumb/screenshots/$jgame->id-1.jpg";
-            }
+            $game->screenshot = "https://cdn.thegamesdb.net/images/thumb/screenshots/$jgame->id-1.jpg";
             $game->platform = $plataform;
             $games[] = $game;
         }

@@ -4,6 +4,7 @@ namespace classic\app\src;
 
 class Helpers
 {
+
     public static function getHttpStatusOk(string $url): bool
     {
         $ch = curl_init($url);
