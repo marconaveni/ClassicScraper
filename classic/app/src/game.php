@@ -19,7 +19,7 @@ class Game
     public string $cover;
     public string $screenshot;
     public string $video;
-    public Plataform $platform;
+    public Platform $platform;
 
     /* This is the static comparing function: */
     public static function compareId($a, $b)

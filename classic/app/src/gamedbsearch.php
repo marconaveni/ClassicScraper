@@ -71,7 +71,7 @@ class GameDBSearch
         $json = file_get_contents($url);
         $json = json_decode($json);
 
-        return $this->setPlataforms($json);
+        return $this->setPlatforms($json);
     }
 
     public function apiGetDevelopers(): array
@@ -111,7 +111,7 @@ class GameDBSearch
         $json = file_get_contents($url);
         $json = json_decode($json);
 
-        return $this->setPlataforms($json);
+        return $this->setPlatforms($json);
     }
 
 
@@ -136,8 +136,8 @@ class GameDBSearch
                 $game->genres = DB::getGenre($conn, $jgame->genres[0]);
             }
 
-            $plataform = new Plataform();
-            $plataform->id = $jgame->platform;
+            $platform = new Platform();
+            $platform->id = $jgame->platform;
 
             $game->id = $jgame->id;
             $game->title = $jgame->game_title;
@@ -148,7 +148,7 @@ class GameDBSearch
                 $game->cover = "https://cdn.thegamesdb.net/images/thumb/" . $json->include->boxart->data->{$jgame->id}[0]->filename;
             }
             $game->screenshot = "https://cdn.thegamesdb.net/images/thumb/screenshots/$jgame->id-1.jpg";
-            $game->platform = $plataform;
+            $game->platform = $platform;
             $games[] = $game;
         }
 
@@ -156,10 +156,10 @@ class GameDBSearch
 
     }
 
-    private function setPlataforms($json): array
+    private function setPlatforms($json): array
     {
         foreach ($json->data->platforms as $jplatform) {
-            $platform = new Plataform();
+            $platform = new Platform();
             $platform->id = $jplatform->id;
             $platform->name = $jplatform->name;
             $platform->alias = $jplatform->alias;

@@ -6,7 +6,7 @@ use classic\app\config\config;
 use classic\app\src\Developer;
 use classic\app\src\Game;
 use classic\app\src\Genres;
-use classic\app\src\Plataform;
+use classic\app\src\Platform;
 use classic\app\src\Publisher;
 
 class DB
@@ -302,7 +302,7 @@ class DB
 
         $platforms = array();
         foreach ($result as $key) {
-            $platform = new Plataform();
+            $platform = new Platform();
             $platform->id = $key['id'];
             $platform->name = $key['name'];
             $platform->alias = $key['alias'];
