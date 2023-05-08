@@ -6,7 +6,7 @@ use classic\app\src\GameDBSearch;
 
 function getDBPlatforms()
 {
-    $conn = DB::dbConnection(config::getDotEnv("database"));
+    $conn = DB::dbConnection();
 
     $resultsgames = array();
     $resultsgames[] = DB::getGameID($conn, $_GET['id']);

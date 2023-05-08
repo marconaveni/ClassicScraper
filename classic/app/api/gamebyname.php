@@ -8,7 +8,7 @@ use classic\app\src\Helpers;
 
 function getDBPlatforms()
 {
-    $conn = DB::dbConnection(config::getDotEnv("database"));
+    $conn = DB::dbConnection();
 
     $resultsgames = DB::getGame($conn, $_GET['title'], $_GET['plataformid']);
     $type = "Database";

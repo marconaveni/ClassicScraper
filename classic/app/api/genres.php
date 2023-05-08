@@ -5,7 +5,7 @@ use classic\app\databases\DB;
 
 function getDBPlatforms()
 {
-    $conn = DB::dbConnection(config::getDotEnv("database"));
+    $conn = DB::dbConnection();
 
     $resultsGenres = array();
     $resultsGenres[] = DB::getGenres($conn);
@@ -14,7 +14,7 @@ function getDBPlatforms()
         
     }
 
-    echo "{ \"code\":200 , \"status\":\"Success\" , \"genres\":" . json_encode($resultsGenres) . "}";
+    echo "{\"code\":200,\"status\":\"Success\",\"genres\":" . json_encode($resultsGenres) . "}";
     exit;
 
 }

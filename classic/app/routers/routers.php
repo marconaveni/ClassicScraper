@@ -12,7 +12,7 @@ if(strpos($path, 'gamebyid') !== false) {              /* /gamebyid?id={int}    
     require_once "../app/api/gamebyid.php";
 } elseif(strpos($path, 'gamebyname') !== false) {      /* /gamebyname?plataformid={int}&title={string}   */
     require_once "../app/api/gamebyname.php";
-} elseif(strpos($path, 'platforms') !== false) {      /* /platforms                           */
+} elseif(strpos($path, 'platforms') !== false) {       /* /platforms                           */
     require_once "../app/api/platforms.php";
 } elseif(strpos($path, 'genres') !== false) {          /* /genres                               */
     require_once "../app/api/genres.php";

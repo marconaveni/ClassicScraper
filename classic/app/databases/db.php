@@ -11,16 +11,12 @@ use classic\app\src\Publisher;
 
 class DB
 {
-    public static function dbConnection(string $database = "")
+    public static function dbConnection()
     {
         $servername = config::getDotEnv("servername");
         $username = config::getDotEnv("username");
         $password = config::getDotEnv("password");
-        if($database == "") {
-            $database = config::getDotEnv("databaseGameDB");
-        }
-        $tgdb = config::getDotEnv("databasetgdb");
-
+        $database = config::getDotEnv("database");
 
         try {
 
@@ -76,7 +72,7 @@ class DB
             }
             return $game;
         }
-        
+
     }
 
     public static function getGame(\PDO $conn, string $title, string $platform, int $try = 1)
@@ -249,10 +245,10 @@ class DB
 
         $genres = array();
         foreach ($result as $key) {
-                $genre = new Genres();
-                $genre->id = $key['id'];
-                $genre->name = $key['genre'];
-                $genres[] = $genre;
+            $genre = new Genres();
+            $genre->id = $key['id'];
+            $genre->name = $key['genre'];
+            $genres[] = $genre;
         }
         return $genres;
     }
@@ -306,11 +302,11 @@ class DB
 
         $platforms = array();
         foreach ($result as $key) {
-                $platform = new Plataform();
-                $platform->id = $key['id'];
-                $platform->name = $key['name'];
-                $platform->alias = $key['alias'];
-                $platforms[] = $platform;
+            $platform = new Plataform();
+            $platform->id = $key['id'];
+            $platform->name = $key['name'];
+            $platform->alias = $key['alias'];
+            $platforms[] = $platform;
         }
         return $platforms;
     }
@@ -556,7 +552,7 @@ class DB
     {
         try {
             $stmt = $conn->prepare(
-                'INSERT INTO game (`id`,`title`,`description`,`developers`,`publishers`,`releasedate`,`players`,`genres`,`cover`,`screenshot`,`plataforms`)                    
+                'INSERT INTO game (`id`,`title`,`description`,`developers`,`publishers`,`releasedate`,`players`,`genres`,`cover`,`screenshot`,`plataforms`)
                  VALUES (:id,:title,:description,:developers,:publishers,:releasedate,:players,:genres,:cover,:screenshot,:plataforms) '
             );
 
@@ -585,7 +581,7 @@ class DB
     {
         try {
             $stmt = $conn->prepare(
-                'INSERT INTO publisher (`id`,`name`)                    
+                'INSERT INTO publisher (`id`,`name`)
                  VALUES (:id,:name) '
             );
             $stmt->execute(array(
@@ -603,7 +599,7 @@ class DB
     {
         try {
             $stmt = $conn->prepare(
-                'INSERT INTO developer (`id`,`name`)                    
+                'INSERT INTO developer (`id`,`name`)
                  VALUES (:id,:name) '
             );
             $stmt->execute(array(
@@ -620,7 +616,7 @@ class DB
     {
         try {
             $stmt = $conn->prepare(
-                'INSERT INTO genre (`id`,`name`)                    
+                'INSERT INTO genre (`id`,`name`)
                  VALUES (:id,:name) '
             );
             $stmt->execute(array(
@@ -637,7 +633,7 @@ class DB
     {
         try {
             $stmt = $conn->prepare(
-                'INSERT INTO plataform (`id`,`name`,`alias`)                    
+                'INSERT INTO plataform (`id`,`name`,`alias`)
                  VALUES (:id,:name,:alias) '
             );
             $stmt->execute(array(
